@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Fortune d'Elon Musk en temps réel</title>
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: "Helvetica Neue", Arial, sans-serif;
+        background: #fdfdfd;
+        color: #333;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        text-align: center;
+    }
+    .container {
+        max-width: 500px;
+        width: 90%;
+    }
+    h1 {
+        font-size: 1.8rem;
+        margin-bottom: 20px;
+        font-weight: 300;
+    }
+    .wealth-card {
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        background: white;
+        margin: 20px auto;
+        text-align: left;
+    }
+    .wealth-details {
+        margin: 15px 0;
+    }
+    .wealth-details p {
+        margin: 5px 0;
+    }
+    .total {
+        font-weight: bold;
+        font-size: 1.2em;
+        color: #2c3e50;
+    }
+    small {
+        color: #7f8c8d;
+    }
+</style>
+</head>
+<body>
+<div class="container">
+    <h1>Fortune d'Elon Musk en temps réel</h1>
+    <div id="wealth-display"></div>
+</div>
+<script>
+class ElonMuskWealthCalculator {
+    constructor() {
+        this.teslaSymbol = 'TSLA';
+        this.teslaShares = 411930000; // Nombre approximatif d'actions détenues
+    }
+
+    async getTeslaPrice() {
+        try {
+            const response = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${this.teslaSymbol}`, {
+                headers: {
+                    'User-Agent': 'Mozilla/5.0',
+                }
+            });
+            const data = await response.json();
+            return data.chart.result[0].meta.regularMarketPrice;
+        } catch (error) {
+            console.error("Erreur lors de la récupération du prix Tesla:", error);
+            return null;
+        }
+    }
+
+    async calculateRealTimeWealth() {
+        try {
+            const teslaPrice = await this.getTeslaPrice();
+            if (!teslaPrice) return null;
+
+            const teslaWealth = this.teslaShares * teslaPrice;
+            const spaceXValue = 147000000000;
+            const xAIValue = 27000000000;
+            const xValue = 19000000000;
+
+            const totalWealth = teslaWealth + spaceXValue + xAIValue + xValue;
+
+            return {
+                tesla: teslaWealth,
+                spaceX: spaceXValue,
+                xAI: xAIValue,
+                x: xValue,
+                total: totalWealth,
+                timestamp: new Date().toISOString()
+            };
+        } catch (error) {
+            console.error("Erreur de calcul:", error);
+            return null;
+        }
+    }
+}
+
+function formatMoney(amount) {
+    return new Intl.NumberFormat('fr-FR', {
+        style: 'currency',
+        currency: 'USD',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+    }).format(amount);
+}
+
+function updateUI() {
+    const calculator = new ElonMuskWealthCalculator();
+    const wealthDisplay = document.getElementById('wealth-display');
+    
+    async function update() {
+        const wealth = await calculator.calculateRealTimeWealth();
+        if (wealth) {
+            wealthDisplay.innerHTML = `
+                <div class="wealth-card">
+                    <h3>Fortune d'Elon Musk</h3>
+                    <div class="wealth-details">
+                        <p>Tesla: ${formatMoney(wealth.tesla)}</p>
+                        <p>SpaceX: ${formatMoney(wealth.spaceX)}</p>
+                        <p>xAI: ${formatMoney(wealth.xAI)}</p>
+                        <p>X (Twitter): ${formatMoney(wealth.x)}</p>
+                        <p class="total">Total: ${formatMoney(wealth.total)}</p>
+                    </div>
+                    <small>Dernière mise à jour: ${new Date(wealth.timestamp).toLocaleTimeString('fr-FR')}</small>
+                </div>
+            `;
+        } else {
+            wealthDisplay.innerHTML = `
+                <div class="wealth-card">
+                    <p>Données indisponibles</p>
+                </div>
+            `;
+        }
+    }
+
+    update();
+    setInterval(update, 10000);
+}
+
+document.addEventListener('DOMContentLoaded', updateUI);
+</script>
+</body>
+</html>
